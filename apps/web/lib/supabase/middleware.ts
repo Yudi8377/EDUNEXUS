@@ -12,21 +12,10 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet, headers) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value),
-          );
-
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
-
-          if (headers) {
-            for (const [name, value] of headers.entries()) {
-              response.headers.set(name, value);
-            }
-          }
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
         },
       },
     },
@@ -38,7 +27,13 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/students") ||
     request.nextUrl.pathname.startsWith("/safety") ||
     request.nextUrl.pathname.startsWith("/ai-control") ||
-    request.nextUrl.pathname.startsWith("/reports");
+    request.nextUrl.pathname.startsWith("/reports") ||
+    request.nextUrl.pathname.startsWith("/teacher") ||
+    request.nextUrl.pathname.startsWith("/tenant") ||
+    request.nextUrl.pathname.startsWith("/schools") ||
+    request.nextUrl.pathname.startsWith("/attendance") ||
+    request.nextUrl.pathname.startsWith("/learning") ||
+    request.nextUrl.pathname.startsWith("/onboarding");
 
   if (!data?.claims && protectedPath) {
     const url = request.nextUrl.clone();
