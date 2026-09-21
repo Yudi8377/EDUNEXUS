@@ -1,0 +1,54 @@
+name: EDUNEXUS Production Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy portable runtime
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Validate deployment contract
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          test -n "$DEPLOY_HOST"
+          test -n "$DEPLOY_USER"
+          test -n "$DEPLOY_PATH"
+          test -n "$DEPLOY_SSH_KEY"
+
+      - name: Configure SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy exact approved commit
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SHA: ${{ github.sha }}
+        run: |
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "
+            set -eu
+            cd '$DEPLOY_PATH'
+            git fetch origin
+            git checkout '$DEPLOY_SHA'
+            docker compose -f deploy/docker-compose.yml build --pull
+            docker compose -f deploy/docker-compose.yml up -d --remove-orphans
+          "
+
+      - name: Record deployment
+        run: echo "EDUNEXUS deployed from commit ${{ github.sha }}"
