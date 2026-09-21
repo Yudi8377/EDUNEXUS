@@ -16,7 +16,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
+      - name: Build portable Next.js runtime
+        run: pnpm --filter @edunexus/web build
+      - name: Verify standalone runtime contract
+        run: |
+          test -f apps/web/.next/standalone/apps/web/server.js
+          test -d apps/web/.next/standalone/node_modules
+          test -d apps/web/.next/static
