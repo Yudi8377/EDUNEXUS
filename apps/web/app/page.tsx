@@ -5,7 +5,7 @@ export default function HomePage() {
     <main className="shell">
       <aside className="rail">
         <div className="brand"><div className="brand-mark">E</div><div><strong>EDUNEXUS</strong><span>Education OS</span></div></div>
-        <nav className="nav"><Link className="nav-active" href="/">Overview</Link><Link href="/students">Students</Link><Link href="/safety">Safety</Link><Link href="/">Learning</Link><Link href="/">AI Control</Link><Link href="/">Reports</Link></nav>
+        <nav className="nav"><Link className="nav-active" href="/">Overview</Link><Link href="/students">Students</Link><Link href="/safety">Safety</Link><Link href="/">Learning</Link><Link href="/">AI Control</Link><Link href="/">Reports</Link><a href="/tenant">Tenant & Access</a><a href="/schools">Schools</a><a href="/ai-control">AI Control</a></nav>
         <div className="rail-footer">● Foundation online<small>D+7 vertical slice</small></div>
       </aside>
       <section className="workspace">
