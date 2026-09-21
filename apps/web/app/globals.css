@@ -30,3 +30,5 @@
 .student-list{display:grid;gap:10px;margin-top:18px}
 .student-row{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:14px 16px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.025)}
 .student-row div{display:grid;gap:4px}.student-row span,.student-row small{color:#8fa39b;font-size:.86rem}
+
+.tenant-list{display:grid;gap:10px;margin-top:14px}
