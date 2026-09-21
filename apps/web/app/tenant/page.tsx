@@ -9,7 +9,7 @@ export default async function TenantPage() {
 
   const [{ data: memberships }, { data: roles }] = await Promise.all([
     supabase.from("tenant_memberships").select("tenant_id, role_code, status, tenants:tenant_id(code,name,tenant_type,status)").eq("status","active"),
-    supabase.from("user_roles").select("tenant_id, role_id, roles:role_id(code,name,risk_level)"),
+    supabase.from("user_roles").select("id, tenant_id, role_id, roles:role_id(code,name,risk_level)"),
   ]);
 
   return (
