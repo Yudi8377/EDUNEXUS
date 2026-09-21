@@ -1,0 +1,3 @@
+-- EDUNEXUS ENGINE 06/07 AI learning guardrails v2
+-- Adds security-invoker safety/learning command views and tenant-scoped AI feedback policy.
+-- No synthetic production data.
