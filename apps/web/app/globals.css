@@ -55,3 +55,7 @@
 .teacher-ai-card .primary{background:var(--deep);color:#e9f5ee;white-space:nowrap}
 @media(max-width:900px){.teacher-metrics{grid-template-columns:repeat(2,1fr)}.teacher-class-grid{grid-template-columns:1fr 1fr}.teacher-heading{display:block}.teacher-heading .tenant{display:inline-block;margin-top:12px}.teacher-ai-card{display:block}.teacher-ai-card .primary{display:inline-block;margin-top:16px}}
 @media(max-width:560px){.teacher-metrics,.teacher-class-grid{grid-template-columns:1fr}.teacher-class-stats{grid-template-columns:1fr 1fr 1fr}}
+
+
+.page-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.print-button{border:1px solid var(--line);background:#fff;color:var(--deep);border-radius:8px;padding:9px 12px;font:700 11px "DM Sans",system-ui,sans-serif;cursor:pointer}.print-button:hover{box-shadow:0 4px 16px rgba(21,63,51,.08)}
+@media print{.rail,.topbar,.page-tools,.hero-actions,.print-button,button,a[href="/"],nav{display:none!important}body,html{background:#fff!important;color:#000!important}.simple-page{max-width:none;padding:20px}.empty-card,.metric,.teacher-class-card{break-inside:avoid;box-shadow:none!important;border:1px solid #bbb!important}.simple-page h1{font-size:28px}.lede{color:#444}.auth-error{display:none!important}}
