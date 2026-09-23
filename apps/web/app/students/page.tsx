@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function StudentsPage() {
+export default async function SiswasPage() {
   const supabase = await createClient();
   const { data: claims } = await supabase.auth.getClaims();
 
@@ -18,20 +18,20 @@ export default async function StudentsPage() {
 
   return (
     <main className="simple-page">
-      <a href="/">← Command Center</a>
-      <p className="eyebrow">STUDENT 360 • LIVE</p>
-      <h1>Student context, in one place.</h1>
-      <p className="lede">Tenant-scoped student context is read through the authenticated Supabase session and protected by database RLS.</p>
+      <a href="/">← Pusat Kendali</a>
+      <p className="eyebrow">PROFIL SISWA 360 • LANGSUNG</p>
+      <h1>Siswa context, in one place.</h1>
+      <p className="lede">Data siswa dibatasi berdasarkan organisasi, dibaca melalui sesi Supabase terautentikasi, dan dilindungi RLS basis data.</p>
 
       {error ? (
         <div className="empty-card">
-          <strong>Student data unavailable</strong>
+          <strong>Siswa data unavailable</strong>
           <span>{error.message}</span>
         </div>
       ) : students?.length ? (
         <div className="empty-card">
-          <strong>{students.length} visible student record{students.length === 1 ? "" : "s"}</strong>
-          <span>Showing the first 50 records visible to the current authenticated tenant context.</span>
+          <strong>{students.length} data siswa yang terlihat{students.length === 1 ? "" : "s"}</strong>
+          <span>Menampilkan 50 data pertama yang terlihat dalam konteks organisasi akun saat ini.</span>
           <div className="student-list">
             {students.map((student) => (
               <article key={student.student_id} className="student-row">
@@ -39,15 +39,15 @@ export default async function StudentsPage() {
                   <strong>{student.full_name}</strong>
                   <span>{student.status}</span>
                 </div>
-                <small>Attendance: {student.attendance_count ?? 0} · Evidence: {student.learning_evidence_count ?? 0}</small>
+                <small>Kehadiran: {student.attendance_count ?? 0} · Bukti: {student.learning_evidence_count ?? 0}</small>
               </article>
             ))}
           </div>
         </div>
       ) : (
         <div className="empty-card">
-          <strong>No student records visible</strong>
-          <span>EDUNEXUS does not create synthetic pupil data. Create a real tenant, school and student through the governed onboarding flow.</span>
+          <strong>Belum ada data siswa yang terlihat</strong>
+          <span>EDUNEXUS tidak membuat data siswa fiktif. Buat organisasi, sekolah, dan siswa nyata melalui alur pendaftaran terkendali.</span>
         </div>
       )}
     </main>
