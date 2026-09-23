@@ -1,0 +1,9 @@
+"use client";
+import Link from "next/link";
+import { FormEvent,useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+export default function RegisterPage(){
+ const [email,setEmail]=useState(""),[password,setPassword]=useState(""),[confirm,setConfirm]=useState(""),[status,setStatus]=useState(""),[busy,setBusy]=useState(false);
+ async function submit(e:FormEvent){e.preventDefault();setStatus("");if(password!==confirm){setStatus("Konfirmasi kata sandi tidak sama.");return}if(password.length<8){setStatus("Kata sandi minimal 8 karakter.");return}setBusy(true);const s=createClient();const {error}=await s.auth.signUp({email,password});if(error)setStatus(error.message);else setStatus("Akun berhasil dibuat. Periksa email Anda untuk verifikasi jika konfirmasi email diaktifkan.");setBusy(false)}
+ return <main className="auth-shell"><section className="auth-card"><Link href="/auth/login" className="secondary">← Kembali ke Masuk</Link><div className="eyebrow">PENDAFTARAN EDUNEXUS</div><h1>Buat akun pengguna.</h1><p>Buat identitas pengguna terlebih dahulu. Hak akses organisasi tidak otomatis diberikan sampai akun memperoleh peran yang sah.</p><form className="auth-form" onSubmit={submit}><label>Email<input type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} required /></label><label>Kata sandi<input type="password" autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)} required /></label><label>Ulangi kata sandi<input type="password" autoComplete="new-password" value={confirm} onChange={e=>setConfirm(e.target.value)} required /></label>{status&&<div className="auth-error" role="status">{status}</div>}<button disabled={busy}>{busy?"Membuat akun...":"Buat akun"}</button></form></section></main>;
+}
