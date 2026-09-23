@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import PrintButton from "@/components/print-button";
 
 export const dynamic = "force-dynamic";
 
@@ -107,14 +108,14 @@ export default async function TeacherCommandCenterPage() {
 
       <section className="teacher-metrics">
         <article className="metric"><span>Siswa yang ditugaskan</span><strong>{teacher.assigned_student_count}</strong><small>Keanggotaan kelas aktif</small></article>
-        <article className="metric"><span>Kelases</span><strong>{teacher.visible_active_class_count}</strong><small>Visible active tugass</small></article>
-        <article className="metric"><span>Kehadiran today</span><strong>{teacher.attendance_today_records}</strong><small>Catatan kehadiran</small></article>
+        <article className="metric"><span>Kelases</span><strong>{teacher.visible_active_class_count}</strong><small>Terlihat dalam kebijakan saat ini</small></article>
+        <article className="metric"><span>Kehadiran hari ini</span><strong>{teacher.attendance_today_records}</strong><small>Catatan kehadiran</small></article>
         <article className="metric"><span>Bukti pembelajaran</span><strong>{teacher.learning_evidence_30d}</strong><small>30 hari terakhir</small></article>
       </section>
 
       <div className="section-head">
         <div><p className="eyebrow">KELAS SAYA</p><h3>Tampilan operasional kelas</h3></div>
-        <span>{ownKelases.length} tugas(s)</span>
+        <span>{ownKelases.length} kelas</span>
       </div>
 
       {ownKelases.length ? (
@@ -130,28 +131,28 @@ export default async function TeacherCommandCenterPage() {
               <div className="teacher-class-stats">
                 <span><b>{row.student_count}</b> students</span>
                 <span><b>{row.attendance_today}</b> attendance</span>
-                <span><b>{row.learning_evidence_30d}</b> evidence / 30d</span>
+                <span><b>{row.learning_evidence_30d}</b> bukti / 30 hari</span>
               </div>
             </article>
           ))}
         </section>
       ) : (
         <div className="empty-card">
-          <strong>No active class tugass</strong>
-          <span>Guru identity exists, but no active class tugas is visible under the current tenant policy.</span>
+          <strong>Belum ada kelas aktif</strong>
+          <span>Identitas guru tersedia, tetapi tidak ada penugasan kelas aktif yang terlihat berdasarkan kebijakan organisasi saat ini.</span>
         </div>
       )}
 
       <section className="teacher-ai-card">
         <div>
-          <p className="eyebrow">GOVERNED AI ASSISTANT</p>
-          <h3>Use evidence. Keep authority human.</h3>
+          <p className="eyebrow">ASISTEN AI TERKENDALI</p>
+          <h3>Gunakan bukti. Pertahankan kewenangan manusia.</h3>
           <p>
             The learning assistant can prepare evidence-grounded instructional recommendations. It cannot mutate grades,
             directly act on students, or bypass high-impact review.
           </p>
         </div>
-        <a className="primary" href="/learning">Open Learning Bukti →</a>
+        <a className="primary" href="/learning">Buka Bukti Pembelajaran →</a>
       </section>
     </main>
   );
