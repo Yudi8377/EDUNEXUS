@@ -8,7 +8,7 @@ export default async function HomePage() {
   return <main className="shell">
     <aside className="rail">
       <div className="brand"><div className="brand-mark">E</div><div><strong>EDUNEXUS</strong><span>Sistem Operasi Pendidikan</span></div></div>
-      <nav className="nav"><Link className="nav-active" href="/">Ringkasan</Link><Link href="/students">Siswa</Link><Link href="/safety">Keselamatan</Link><Link href="/teacher">Guru</Link><Link href="/ai-control">Kendali AI</Link><Link href="/reports">Laporan</Link><Link href="/tenant">Organisasi & Akses</Link><Link href="/schools">Sekolah</Link><Link href="/onboarding">Tambah Organisasi</Link></nav>
+      <nav className="nav"><Link className="nav-active" href="/">Ringkasan</Link><Link href="/students">Siswa</Link><Link href="/safety">Keselamatan</Link><Link href="/teacher">Guru</Link><Link href="/attendance">Kehadiran</Link><Link href="/learning">Pembelajaran</Link><Link href="/ai-control">Kendali AI</Link><Link href="/reports">Laporan</Link><Link href="/tenant">Organisasi & Akses</Link><Link href="/schools">Sekolah</Link><Link href="/onboarding">Tambah Organisasi</Link></nav>
       <div className="rail-footer">● Fondasi aktif<small>Potongan vertikal D+7</small></div>
     </aside>
     <section className="workspace">
