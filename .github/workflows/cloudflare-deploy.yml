@@ -1,0 +1,169 @@
+name: EDUNEXUS Cloudflare Free Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref/SHA to deploy"
+        required: true
+        default: "deployment/cloudflare-free-v1"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy EDUNEXUS Web to Cloudflare Workers Free
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - name: Checkout approved ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install workspace
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Validate required deployment configuration
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$NEXT_PUBLIC_SUPABASE_URL"
+          test -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY"
+
+      - name: Verify Cloudflare account access
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -o /tmp/edunexus-workers-before.json
+          python - <<'PY'
+          import json
+          p="/tmp/edunexus-workers-before.json"
+          d=json.load(open(p))
+          if not d.get("success"):
+              raise SystemExit("Cloudflare API rejected the configured account/token.")
+          print("Cloudflare account/token access: OK")
+          PY
+
+      - name: Build Cloudflare Worker
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: pnpm exec opennextjs-cloudflare build
+
+      - name: Deploy Cloudflare Worker
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: pnpm exec opennextjs-cloudflare deploy -- --keep-vars
+
+      - name: Verify EDUNEXUS Worker exists in target account
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/edunexus-web" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -o /tmp/edunexus-worker.json
+
+          python - <<'PY'
+          import json
+          p="/tmp/edunexus-worker.json"
+          d=json.load(open(p))
+          if not d.get("success"):
+              raise SystemExit("EDUNEXUS Worker was not found in the configured Cloudflare account.")
+          result=d.get("result") or {}
+          print("EDUNEXUS Worker: PRESENT")
+          print("Worker ID:", result.get("id", "edunexus-web"))
+          PY
+
+      - name: Verify workers.dev subdomain and publish runtime URL
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          curl --fail-with-body --silent --show-error \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -o /tmp/edunexus-account-subdomain.json
+
+          curl --fail-with-body --silent --show-error \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/edunexus-web/subdomain" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -o /tmp/edunexus-worker-subdomain.json
+
+          python - <<'PY'
+          import json
+          account=json.load(open("/tmp/edunexus-account-subdomain.json"))
+          worker=json.load(open("/tmp/edunexus-worker-subdomain.json"))
+
+          if not account.get("success"):
+              raise SystemExit("Cloudflare account workers.dev subdomain could not be read.")
+          if not worker.get("success"):
+              raise SystemExit("Cloudflare workers.dev status for edunexus-web could not be read.")
+
+          sub=(account.get("result") or {}).get("subdomain")
+          enabled=(worker.get("result") or {}).get("enabled")
+
+          if not sub:
+              raise SystemExit("No workers.dev account subdomain is configured.")
+          if not enabled:
+              raise SystemExit("edunexus-web exists but its workers.dev route is disabled.")
+
+          url=f"https://edunexus-web.{sub}.workers.dev"
+          print(f"EDUNEXUS_RUNTIME_URL={url}")
+          with open("/tmp/edunexus-runtime-url.txt","w") as f:
+              f.write(url)
+          PY
+
+      - name: HTTP smoke test EDUNEXUS
+        run: |
+          set -euo pipefail
+          url="$(cat /tmp/edunexus-runtime-url.txt)"
+          echo "Smoke testing: $url"
+          curl --fail-with-body --silent --show-error --location \
+            --retry 5 --retry-delay 3 --retry-all-errors \
+            --max-time 30 "$url" \
+            -o /tmp/edunexus-home.html
+          test -s /tmp/edunexus-home.html
+          echo "EDUNEXUS HTTP smoke test: PASS"
+
+      - name: Print deployment metadata
+        working-directory: apps/web
+        run: pnpm exec wrangler deployments list
