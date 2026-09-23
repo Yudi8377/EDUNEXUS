@@ -6,7 +6,7 @@ on:
       ref:
         description: "Git ref/SHA to deploy"
         required: true
-        default: "deployment/cloudflare-free-v1"
+        default: "main"
         type: string
 
 permissions:
@@ -93,22 +93,23 @@ jobs:
         run: |
           set -euo pipefail
           curl --fail-with-body --silent --show-error \
-            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/edunexus-web" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json" \
-            -o /tmp/edunexus-worker.json
+            -o /tmp/edunexus-workers.json
 
           python - <<'PY'
           import json
-          p="/tmp/edunexus-worker.json"
-          d=json.load(open(p))
+          d=json.load(open("/tmp/edunexus-workers.json"))
           if not d.get("success"):
+              raise SystemExit("Cloudflare Worker list could not be read.")
+          workers=d.get("result") or []
+          match=next((w for w in workers if w.get("id") == "edunexus-web"), None)
+          if not match:
               raise SystemExit("EDUNEXUS Worker was not found in the configured Cloudflare account.")
-          result=d.get("result") or {}
           print("EDUNEXUS Worker: PRESENT")
-          print("Worker ID:", result.get("id", "edunexus-web"))
+          print("Worker ID:", match.get("id"))
           PY
-
       - name: Verify workers.dev subdomain and publish runtime URL
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
