@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import PrintButton from "@/components/print-button";
 
 export const dynamic = "force-dynamic";
 
@@ -20,17 +21,17 @@ export default async function SiswasPage() {
     <main className="simple-page">
       <a href="/">← Pusat Kendali</a>
       <p className="eyebrow">PROFIL SISWA 360 • LANGSUNG</p>
-      <h1>Siswa context, in one place.</h1>
+      <h1>Profil siswa, dalam satu tempat.</h1>
       <p className="lede">Data siswa dibatasi berdasarkan organisasi, dibaca melalui sesi Supabase terautentikasi, dan dilindungi RLS basis data.</p>
 
       {error ? (
         <div className="empty-card">
-          <strong>Siswa data unavailable</strong>
+          <strong>Data siswa tidak tersedia</strong>
           <span>{error.message}</span>
         </div>
       ) : students?.length ? (
         <div className="empty-card">
-          <strong>{students.length} data siswa yang terlihat{students.length === 1 ? "" : "s"}</strong>
+          <strong>{students.length} data siswa terlihat</strong>
           <span>Menampilkan 50 data pertama yang terlihat dalam konteks organisasi akun saat ini.</span>
           <div className="student-list">
             {students.map((student) => (
