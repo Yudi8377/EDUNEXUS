@@ -18,6 +18,10 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Install Cloudflare build toolchain for typecheck and build
+        working-directory: apps/web
+        run: |
+          pnpm add --save-dev --no-save @opennextjs/cloudflare@1.20.6 wrangler@4.135.0
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
