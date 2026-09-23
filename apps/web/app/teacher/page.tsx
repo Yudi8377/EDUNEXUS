@@ -7,7 +7,7 @@ type TeacherRow = {
   employee_no: string;
   teacher_name: string;
   teacher_status: string;
-  active_assignment_count: number;
+  active_tugas_count: number;
   active_class_count: number;
   visible_active_class_count: number;
   assigned_student_count: number;
@@ -16,13 +16,13 @@ type TeacherRow = {
   last_learning_evidence_at: string | null;
 };
 
-type ClassRow = {
+type KelasRow = {
   teacher_id: string;
   class_id: string;
   class_code: string;
   class_name: string;
   class_status: string;
-  assignment_role: string;
+  tugas_role: string;
   subject_code: string | null;
   student_count: number;
   attendance_today: number;
@@ -39,13 +39,13 @@ export default async function TeacherCommandCenterPage() {
       supabase
         .from("v_teacher_command_center")
         .select(
-          "teacher_id,employee_no,teacher_name,teacher_status,active_assignment_count,active_class_count,visible_active_class_count,assigned_student_count,attendance_today_records,learning_evidence_30d,last_learning_evidence_at",
+          "teacher_id,employee_no,teacher_name,teacher_status,active_tugas_count,active_class_count,visible_active_class_count,assigned_student_count,attendance_today_records,learning_evidence_30d,last_learning_evidence_at",
         )
         .limit(20),
       supabase
         .from("v_teacher_class_command")
         .select(
-          "teacher_id,class_id,class_code,class_name,class_status,assignment_role,subject_code,student_count,attendance_today,learning_evidence_30d",
+          "teacher_id,class_id,class_code,class_name,class_status,tugas_role,subject_code,student_count,attendance_today,learning_evidence_30d",
         )
         .limit(100),
     ]);
@@ -53,11 +53,11 @@ export default async function TeacherCommandCenterPage() {
   if (teacherError || classError) {
     return (
       <main className="simple-page">
-        <a href="/">← Command Center</a>
-        <p className="eyebrow">TEACHER OPERATIONS</p>
-        <h1>Teacher Command Center</h1>
+        <a href="/">← Pusat Kendali</a>
+        <p className="eyebrow">OPERASI GURU</p>
+        <h1>Pusat Kendali Guru</h1>
         <div className="empty-card">
-          <strong>Teacher operational data unavailable</strong>
+          <strong>Data operasional guru tidak tersedia</strong>
           <span>{teacherError?.message ?? classError?.message}</span>
         </div>
       </main>
@@ -65,20 +65,20 @@ export default async function TeacherCommandCenterPage() {
   }
 
   const teacherRows = (teachers ?? []) as TeacherRow[];
-  const classRows = (classes ?? []) as ClassRow[];
+  const classRows = (classes ?? []) as KelasRow[];
   const teacher = teacherRows[0];
 
   if (!teacher) {
     return (
       <main className="simple-page">
-        <a href="/">← Command Center</a>
-        <p className="eyebrow">TEACHER OPERATIONS • LIVE</p>
-        <h1>Teacher Command Center</h1>
+        <a href="/">← Pusat Kendali</a>
+        <p className="eyebrow">OPERASI GURU • LIVE</p>
+        <h1>Pusat Kendali Guru</h1>
         <p className="lede">
-          A governed operational surface for classes, attendance, learning evidence and AI-assisted teaching support.
+          Ruang operasional terkendali untuk kelas, kehadiran, bukti pembelajaran, dan dukungan pengajaran berbantuan AI.
         </p>
         <div className="empty-card">
-          <strong>No teacher account is provisioned yet.</strong>
+          <strong>Belum ada akun guru yang disediakan.</strong>
           <span>
             The live database currently contains no teacher records. Provision a teacher through the governed onboarding
             operation; EDUNEXUS does not create synthetic personnel data.
@@ -88,45 +88,45 @@ export default async function TeacherCommandCenterPage() {
     );
   }
 
-  const ownClasses = classRows.filter((row) => row.teacher_id === teacher.teacher_id);
+  const ownKelases = classRows.filter((row) => row.teacher_id === teacher.teacher_id);
 
   return (
     <main className="simple-page teacher-page">
-      <a href="/">← Command Center</a>
-      <p className="eyebrow">TEACHER OPERATIONS • LIVE</p>
+      <a href="/">← Pusat Kendali</a>
+      <p className="eyebrow">OPERASI GURU • LIVE</p>
       <div className="teacher-heading">
         <div>
-          <h1>Good teaching starts with clear context.</h1>
+          <h1>Pengajaran yang baik dimulai dari konteks yang jelas.</h1>
           <p className="lede">
             {teacher.teacher_name} · {teacher.employee_no}. One governed view across assigned classes, attendance and
             learning evidence.
           </p>
         </div>
-        <span className="tenant">Teacher {teacher.teacher_status}</span>
+        <span className="tenant">Guru {teacher.teacher_status}</span>
       </div>
 
       <section className="teacher-metrics">
-        <article className="metric"><span>Assigned students</span><strong>{teacher.assigned_student_count}</strong><small>Active class memberships</small></article>
-        <article className="metric"><span>Classes</span><strong>{teacher.visible_active_class_count}</strong><small>Visible active assignments</small></article>
-        <article className="metric"><span>Attendance today</span><strong>{teacher.attendance_today_records}</strong><small>Recorded attendance rows</small></article>
-        <article className="metric"><span>Learning evidence</span><strong>{teacher.learning_evidence_30d}</strong><small>Last 30 days</small></article>
+        <article className="metric"><span>Siswa yang ditugaskan</span><strong>{teacher.assigned_student_count}</strong><small>Keanggotaan kelas aktif</small></article>
+        <article className="metric"><span>Kelases</span><strong>{teacher.visible_active_class_count}</strong><small>Visible active tugass</small></article>
+        <article className="metric"><span>Kehadiran today</span><strong>{teacher.attendance_today_records}</strong><small>Catatan kehadiran</small></article>
+        <article className="metric"><span>Bukti pembelajaran</span><strong>{teacher.learning_evidence_30d}</strong><small>30 hari terakhir</small></article>
       </section>
 
       <div className="section-head">
-        <div><p className="eyebrow">MY CLASSES</p><h3>Operational class view</h3></div>
-        <span>{ownClasses.length} assignment(s)</span>
+        <div><p className="eyebrow">KELAS SAYA</p><h3>Tampilan operasional kelas</h3></div>
+        <span>{ownKelases.length} tugas(s)</span>
       </div>
 
-      {ownClasses.length ? (
+      {ownKelases.length ? (
         <section className="teacher-class-grid">
-          {ownClasses.map((row) => (
+          {ownKelases.map((row) => (
             <article className="teacher-class-card" key={row.class_id}>
               <div className="teacher-class-top">
                 <span>{row.class_code}</span>
-                <small>{row.assignment_role.replaceAll("_", " ")}</small>
+                <small>{row.tugas_role.replaceAll("_", " ")}</small>
               </div>
               <h4>{row.class_name}</h4>
-              <p>{row.subject_code ? `Subject · ${row.subject_code}` : "Class assignment"}</p>
+              <p>{row.subject_code ? `Mata pelajaran · ${row.subject_code}` : "Kelas tugas"}</p>
               <div className="teacher-class-stats">
                 <span><b>{row.student_count}</b> students</span>
                 <span><b>{row.attendance_today}</b> attendance</span>
@@ -137,8 +137,8 @@ export default async function TeacherCommandCenterPage() {
         </section>
       ) : (
         <div className="empty-card">
-          <strong>No active class assignments</strong>
-          <span>Teacher identity exists, but no active class assignment is visible under the current tenant policy.</span>
+          <strong>No active class tugass</strong>
+          <span>Guru identity exists, but no active class tugas is visible under the current tenant policy.</span>
         </div>
       )}
 
@@ -151,7 +151,7 @@ export default async function TeacherCommandCenterPage() {
             directly act on students, or bypass high-impact review.
           </p>
         </div>
-        <a className="primary" href="/learning">Open Learning Evidence →</a>
+        <a className="primary" href="/learning">Open Learning Bukti →</a>
       </section>
     </main>
   );
