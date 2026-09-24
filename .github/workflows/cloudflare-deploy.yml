@@ -1,6 +1,9 @@
 name: EDUNEXUS Cloudflare Free Deploy
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       ref:
@@ -22,7 +25,7 @@ jobs:
       - name: Checkout approved ref
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || github.sha }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -110,6 +113,7 @@ jobs:
           print("EDUNEXUS Worker: PRESENT")
           print("Worker ID:", match.get("id"))
           PY
+
       - name: Verify workers.dev subdomain and publish runtime URL
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
