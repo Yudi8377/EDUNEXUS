@@ -3,22 +3,24 @@ import { createClient as createSupabaseServerClient } from "@/lib/supabase/serve
 import { createClient } from "@supabase/supabase-js";
 
 const ROLE_LABELS: Record<string, string> = {
-  owner: "Pemilik",
-  admin: "Administrator",
-  manager: "Manajer",
+  tenant_admin: "Administrator Organisasi",
+  school_admin: "Administrator Sekolah",
   teacher: "Guru",
   staff: "Staf",
   student: "Siswa",
   parent: "Orang tua/wali",
+  counselor: "Konselor",
+  security_officer: "Petugas Keamanan",
 };
 const ROLE_CODES: Record<string, string> = {
-  owner: "TENANT_ADMIN",
-  admin: "TENANT_ADMIN",
-  manager: "TENANT_ADMIN",
+  tenant_admin: "TENANT_ADMIN",
+  school_admin: "SCHOOL_ADMIN",
   teacher: "TEACHER",
   staff: "STAFF",
   student: "STUDENT",
   parent: "PARENT",
+  counselor: "COUNSELOR",
+  security_officer: "SECURITY_OFFICER",
 };
 
 function getAdminClient() {
@@ -88,8 +90,6 @@ export async function POST(request: NextRequest) {
     const { actor, admin, error } = await getActor(request);
     if (error || !actor || !admin) return NextResponse.json({ error: error ?? "Sesi login tidak valid." }, { status: 401 });
     if (!(await canManage(admin, actor.id, tenantId))) return NextResponse.json({ error: "Anda tidak memiliki hak untuk menambah pengguna pada organisasi ini." }, { status: 403 });
-    if (requestedRole === "owner") return NextResponse.json({ error: "Peran Pemilik hanya digunakan sebagai label kompatibilitas; administrator organisasi tetap menggunakan TENANT_ADMIN." }, { status: 400 });
-
     const dbRoleCode = ROLE_CODES[requestedRole];
     const { data: role, error: roleError } = await admin.from("roles").select("id,code,name").eq("code", dbRoleCode).maybeSingle();
     if (roleError) return NextResponse.json({ error: roleError.message }, { status: 500 });
