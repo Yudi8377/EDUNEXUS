@@ -4,13 +4,14 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 
 const roles = [
-  { code: "owner", label: "Pemilik", desc: "Kontrol penuh organisasi dan pengelolaan akses." },
-  { code: "admin", label: "Administrator", desc: "Administrasi organisasi dan pengguna." },
-  { code: "manager", label: "Manajer", desc: "Pengelolaan operasional sesuai kebijakan organisasi." },
-  { code: "teacher", label: "Guru", desc: "Operasi pembelajaran dan data yang diberikan kepada guru." },
-  { code: "staff", label: "Staf", desc: "Operasi administrasi yang ditugaskan." },
-  { code: "student", label: "Siswa", desc: "Akses pembelajaran dan data pribadi siswa." },
-  { code: "parent", label: "Orang tua/wali", desc: "Akses informasi anak sesuai kewenangan." },
+  { code: "tenant_admin", dbCode: "TENANT_ADMIN", label: "Administrator Organisasi", desc: "Administrasi organisasi dan pengelolaan akses." },
+  { code: "school_admin", dbCode: "SCHOOL_ADMIN", label: "Administrator Sekolah", desc: "Administrasi sekolah sesuai kewenangan yang diberikan." },
+  { code: "teacher", dbCode: "TEACHER", label: "Guru", desc: "Operasi pembelajaran dan data yang diberikan kepada guru." },
+  { code: "staff", dbCode: "STAFF", label: "Staf", desc: "Operasi administrasi yang ditugaskan." },
+  { code: "student", dbCode: "STUDENT", label: "Siswa", desc: "Akses pembelajaran dan data pribadi siswa." },
+  { code: "parent", dbCode: "PARENT", label: "Orang tua/wali", desc: "Akses informasi anak sesuai kewenangan." },
+  { code: "counselor", dbCode: "COUNSELOR", label: "Konselor", desc: "Akses layanan konseling sesuai kewenangan." },
+  { code: "security_officer", dbCode: "SECURITY_OFFICER", label: "Petugas Keamanan", desc: "Kendali keselamatan dan verifikasi yang ditugaskan." },
 ];
 
 type Tenant = { id: string; name: string; code: string; roleCode: string };
@@ -52,8 +53,8 @@ export default function AddUserPage() {
         <Link href="/tenant">← Kembali ke Organisasi & Akses</Link>
       </div>
       <p className="eyebrow">PENGGUNA & HAK AKSES • TERKENDALI</p>
-      <h1>Tambah pengguna dan tetapkan perannya.</h1>
-      <p className="lede">Pengguna baru menerima undangan melalui email. Hak akses diberikan di tingkat organisasi dan tidak dapat dinaikkan dari sisi browser.</p>
+      <h1>Tambah pengguna & tetapkan privilege.</h1>
+      <p className="lede">Pengguna baru menerima undangan melalui email. Pilih hanya privilege yang tersedia pada fondasi EDUNEXUS. Server memvalidasi kembali role sebelum akses diberikan.</p>
 
       {!tenants.length && (
         <button className="secondary" type="button" onClick={loadTenants}>Muat organisasi yang dapat dikelola</button>
@@ -73,9 +74,9 @@ export default function AddUserPage() {
               {tenants.map(t => <option key={t.id} value={t.id}>{t.name} ({t.code})</option>)}
             </select>
           </label>
-          <label>Peran
+          <label>Privilege / peran
             <select value={roleCode} onChange={e => setRoleCode(e.target.value)}>
-              {roles.map(r => <option key={r.code} value={r.code}>{r.label}</option>)}
+              {roles.map(r => <option key={r.code} value={r.code}>{r.label} · {r.dbCode}</option>)}
             </select>
           </label>
         </section>
@@ -83,7 +84,7 @@ export default function AddUserPage() {
           {roles.map(r => <article className="report-card" key={r.code}><strong>{r.label}</strong><span>{r.desc}</span></article>)}
         </div>
         {status && <div className="auth-error" role="status">{status}</div>}
-        <button type="submit" disabled={busy || !tenantId}>{busy ? "Mengirim undangan..." : "Tambah pengguna & kirim undangan"}</button>
+        <button type="submit" disabled={busy || !tenantId}>{busy ? "Mengirim undangan..." : "Tambah pengguna, privilege & kirim undangan"}</button>
       </form>
     </main>
   );
