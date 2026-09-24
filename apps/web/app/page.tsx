@@ -7,9 +7,12 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function HomePage() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [fullName, setFullName] = useState("");
+  const [organizationName, setOrganizationName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [privilege, setPrivilege] = useState("TENANT_ADMIN");
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
@@ -19,9 +22,29 @@ export default function HomePage() {
     supabase.auth.getUser().then(({ data }) => setAuthenticated(Boolean(data.user)));
   }, []);
 
+  function saveBootstrapDraft() {
+    window.localStorage.setItem("edunexus_bootstrap_draft", JSON.stringify({
+      fullName,
+      organizationName,
+      privilege,
+    }));
+  }
+
   async function register(event: FormEvent) {
     event.preventDefault();
     setStatus("");
+    if (fullName.trim().length < 2) {
+      setStatus("Nama lengkap minimal 2 karakter.");
+      return;
+    }
+    if (organizationName.trim().length < 3) {
+      setStatus("Nama organisasi / sekolah minimal 3 karakter.");
+      return;
+    }
+    if (privilege !== "TENANT_ADMIN") {
+      setStatus("Hak akses awal harus Administrator Organisasi.");
+      return;
+    }
     if (password !== confirm) {
       setStatus("Konfirmasi kata sandi tidak sama.");
       return;
@@ -32,11 +55,13 @@ export default function HomePage() {
     }
 
     setBusy(true);
+    saveBootstrapDraft();
     const supabase = createClient();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        data: { full_name: fullName.trim() },
         emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/onboarding/bootstrap")}`,
       },
     });
@@ -57,8 +82,13 @@ export default function HomePage() {
   }
 
   async function registerWithGoogle() {
+    if (fullName.trim().length < 2 || organizationName.trim().length < 3) {
+      setStatus("Isi Nama lengkap dan Nama organisasi / sekolah terlebih dahulu.");
+      return;
+    }
     setGoogleBusy(true);
     setStatus("");
+    saveBootstrapDraft();
     const supabase = createClient();
     const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent("/onboarding/bootstrap")}`;
     const { error } = await supabase.auth.signInWithOAuth({
@@ -78,33 +108,57 @@ export default function HomePage() {
   if (!authenticated) {
     return (
       <main className="auth-shell">
-        <section className="auth-card">
+        <section className="auth-card auth-card-wide">
           <div className="eyebrow">AKSES AWAL EDUNEXUS</div>
-          <h1>Daftar sebelum masuk ke sistem.</h1>
-          <p>Mulai dengan membuat identitas EDUNEXUS. Setelah akun terverifikasi, Anda akan membuat organisasi pertama dan menjadi administrator organisasi tersebut.</p>
+          <h1>Buat user baru & tentukan hak akses.</h1>
+          <p>Form ini menjadi pintu pertama sebelum dashboard. Akun pertama dibuat sebagai administrator organisasi agar struktur, pengguna, dan hak akses dapat dikelola secara aman.</p>
 
           <form className="auth-form" onSubmit={register}>
+            <div className="auth-section-title">01 · IDENTITAS USER</div>
+            <div className="auth-two-col">
+              <label>Nama lengkap
+                <input type="text" autoComplete="name" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Nama administrator" required />
+              </label>
+              <label>Nama organisasi / sekolah
+                <input type="text" value={organizationName} onChange={e => setOrganizationName(e.target.value)} placeholder="Contoh: Sekolah EDUNEXUS Indonesia" minLength={3} required />
+              </label>
+            </div>
+
+            <div className="auth-section-title">02 · AKUN LOGIN</div>
             <label>Email
               <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="nama@contoh.id" required />
             </label>
-            <label>Kata sandi
-              <input type="password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Minimal 8 karakter" required />
+            <div className="auth-two-col">
+              <label>Kata sandi
+                <input type="password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Minimal 8 karakter" required />
+              </label>
+              <label>Ulangi kata sandi
+                <input type="password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Ulangi kata sandi" required />
+              </label>
+            </div>
+
+            <div className="auth-section-title">03 · HAK AKSES / PRIVILEGE</div>
+            <label>Hak akses awal
+              <select className="auth-select" value={privilege} onChange={e => setPrivilege(e.target.value)}>
+                <option value="TENANT_ADMIN">Administrator Organisasi — TENANT_ADMIN</option>
+              </select>
             </label>
-            <label>Ulangi kata sandi
-              <input type="password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Ulangi kata sandi" required />
-            </label>
+            <div className="privilege-note">
+              <strong>Administrator Organisasi</strong>
+              <span>Dapat mengelola organisasi, pengguna, dan role sesuai kebijakan EDUNEXUS. Role Guru, Staf, Siswa, dan Orang Tua diberikan kemudian melalui menu <b>Organisasi & Akses</b>.</span>
+            </div>
 
             {status && <div className="auth-error" role="status">{status}</div>}
 
             <button type="submit" disabled={busy || googleBusy}>
-              {busy ? "Membuat akun…" : "Daftar & mulai EDUNEXUS"}
+              {busy ? "Membuat user…" : "Buat user & lanjutkan"}
             </button>
 
             <div className="auth-divider" aria-hidden="true"><span>atau</span></div>
 
             <button type="button" className="google-button" onClick={registerWithGoogle} disabled={busy || googleBusy}>
               <span aria-hidden="true">G</span>
-              {googleBusy ? "Menghubungkan ke Google…" : "Daftar dengan Google"}
+              {googleBusy ? "Menghubungkan ke Google…" : "Buat user dengan Google"}
             </button>
           </form>
 
@@ -114,8 +168,8 @@ export default function HomePage() {
           </div>
 
           <div className="auth-security">
-            <strong>AKSES AMAN</strong>
-            <span>Identitas diverifikasi melalui Supabase Auth. Hak akses organisasi diberikan terpisah melalui role dan kebijakan keamanan EDUNEXUS.</span>
+            <strong>KEAMANAN ROLE</strong>
+            <span>Autentikasi user dan otorisasi privilege dipisahkan. Role tidak dipercaya dari data browser; server EDUNEXUS menetapkan TENANT_ADMIN saat bootstrap organisasi pertama.</span>
           </div>
         </section>
       </main>
