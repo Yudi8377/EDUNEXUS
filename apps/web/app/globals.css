@@ -61,3 +61,5 @@
 @media print{.rail,.topbar,.page-tools,.hero-actions,.print-button,button,a[href="/"],nav{display:none!important}body,html{background:#fff!important;color:#000!important}.simple-page{max-width:none;padding:20px}.empty-card,.metric,.teacher-class-card{break-inside:avoid;box-shadow:none!important;border:1px solid #bbb!important}.simple-page h1{font-size:28px}.lede{color:#444}.auth-error{display:none!important}}
 
 .report-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:24px}.report-card{display:grid;gap:7px;padding:20px;background:#fff;border:1px solid var(--line);border-radius:14px}.report-card strong{font:700 15px Manrope;color:var(--deep)}.report-card span{font-size:11px;line-height:1.6;color:#71807b}@media(max-width:600px){.report-grid{grid-template-columns:1fr}}
+
+.role-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}.role-grid .report-card{margin:0}@media(max-width:700px){.role-grid{grid-template-columns:1fr}}
