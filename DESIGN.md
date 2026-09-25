@@ -26,3 +26,11 @@ EDUNEXUS is an operational Education Operating System. Authenticated users work 
 
 ## Current implementation stage
 The 33-application layer provides application navigation, operational workspaces, existing-data surfaces, workflow/access contracts, and print support. Full domain CRUD is implemented incrementally per application in blueprint order.
+
+## Public School Website
+- Public school websites are a distinct marketing/content register from the authenticated EDUNEXUS operational workspace.
+- The school site is tenant-branded and reads published content from Supabase; it must not expose student, guardian, staff, audit, or other private operational data.
+- Visual direction: editorial education, warm paper surfaces, deep forest green authority, restrained gold accents, large Manrope display type, DM Sans body copy, real-content-first cards, and a strong photographic campus hero.
+- Primary navigation uses plain public terms: Tentang, Program, Fasilitas, Berita, Agenda, Penerimaan. Authenticated access is labeled Portal EDUNEXUS.
+- The public site is a presentation layer over school data; future admin editing should reuse the existing EDUNEXUS operational CRUD primitives rather than creating a second content-management system.
+- Demo school content is explicitly tied to SNM-DEMO and must be replaced by tenant content before a real school domain is published.
