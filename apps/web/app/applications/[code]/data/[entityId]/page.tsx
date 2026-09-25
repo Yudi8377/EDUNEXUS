@@ -152,6 +152,18 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
   const { data: rows, error } = await supabase.from(entity.table_name as any).select("*").limit(100);
   const records = (rows ?? []) as Record<string, unknown>[];
   const columns = records.length && records[0] ? Object.keys(records[0]).slice(0, 12) : [];
+  const [{ data: students }, { data: employees }, { data: guardians }, { data: teachers }] = await Promise.all([
+    supabase.from("students").select("id,student_no,full_name").order("full_name").limit(200),
+    supabase.from("employees").select("id,employee_no,full_name").order("full_name").limit(200),
+    supabase.from("guardians").select("id,full_name").order("full_name").limit(200),
+    supabase.from("teachers").select("id,employee_no,full_name").order("full_name").limit(200)
+  ]);
+  const relationOptions: Record<string, Array<{ value: string; label: string }>> = {
+    student_id: (students ?? []).map((x) => ({ value: x.id, label: x.full_name + " (" + x.student_no + ")" })),
+    employee_id: (employees ?? []).map((x) => ({ value: x.id, label: x.full_name + " (" + x.employee_no + ")" })),
+    guardian_id: (guardians ?? []).map((x) => ({ value: x.id, label: x.full_name })),
+    teacher_id: (teachers ?? []).map((x) => ({ value: x.id, label: x.full_name + " (" + x.employee_no + ")" }))
+  };
   const editRecord = edit ? records.find((row) => String(row.id) === edit) : undefined;
   const sampleData = (records[0]?.data && typeof records[0].data === "object" && !Array.isArray(records[0].data) ? records[0].data : {}) as Record<string, unknown>;
   const editData = (editRecord?.data && typeof editRecord.data === "object" && !Array.isArray(editRecord.data) ? editRecord.data : sampleData) as Record<string, unknown>;
@@ -188,7 +200,7 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
           {formColumns.length ? (
             <form action={mutateRecord} className="nx-record-form">
               <input type="hidden" name="_action" value="insert" /><input type="hidden" name="_code" value={code} /><input type="hidden" name="_entityId" value={entityId} />
-              {formColumns.map((column) => <Field key={column} name={column} value={undefined} reference={records[0]?.[column]} options={optionsFor(column)} />)}
+              {formColumns.map((column) => <Field key={column} name={column} value={undefined} reference={records[0]?.[column]} options={optionsFor(column, relationOptions)} />)}
               {dataFields.length ? <fieldset className="nx-form-section"><legend>Detail data</legend>{dataFields.map((field) => <Field key={field} name={"data__"+field} value={undefined} reference={sampleData[field]} />)}</fieldset> : null}
               <button className="nx-save-button" type="submit">Simpan data</button>
             </form>
@@ -241,8 +253,8 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
   );
 }
 
-function optionsFor(column: string): Array<{ value: string; label: string }> | undefined {
-  return undefined;
+function optionsFor(column: string, relationOptions: Record<string, Array<{ value: string; label: string }>>) {
+  return relationOptions[column];
 }
 
 function Field({ name, value, reference, options }: { name: string; value: unknown; reference: unknown; options?: Array<{ value: string; label: string }> }) {
