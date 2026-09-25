@@ -62,7 +62,7 @@ async function mutateRecord(formData: FormData) {
   for (const column of columns) {
     if (IMMUTABLE_FIELDS.has(column) || column === "tenant_id") continue;
     const raw = formData.get(column);
-    if (raw === null) continue;
+    if (raw === null) {\n      if (typeof sampleRecord[column] === "boolean") payload[column] = false;\n      continue;\n    }
     if (typeof raw === "string" && raw === "") {
       payload[column] = null;
       continue;
@@ -91,15 +91,15 @@ async function mutateRecord(formData: FormData) {
         .maybeSingle();
       if (membership?.tenant_id) payload.tenant_id = membership.tenant_id;
     }
-    await supabase.from(table).insert(payload);
+    const { error } = await supabase.from(table).insert(payload);\n    if (error) redirect(`/applications/${code}/data/${entityId}?error=${encodeURIComponent(error.message)}`);
   }
 
   if (action === "update" && recordId) {
-    await supabase.from(table).update(payload).eq("id", recordId);
+    const { error } = await supabase.from(table).update(payload).eq("id", recordId);\n    if (error) redirect(`/applications/${code}/data/${entityId}?error=${encodeURIComponent(error.message)}`);
   }
 
   if (action === "delete" && recordId) {
-    await supabase.from(table).delete().eq("id", recordId);
+    const { error } = await supabase.from(table).delete().eq("id", recordId);\n    if (error) redirect(`/applications/${code}/data/${entityId}?error=${encodeURIComponent(error.message)}`);
   }
 
   redirect(`/applications/${code}/data/${entityId}`);
@@ -107,7 +107,7 @@ async function mutateRecord(formData: FormData) {
 
 export default async function ApplicationEntityPage({ params, searchParams }: Props) {
   const { code, entityId } = await params;
-  const { mode, edit } = await searchParams;
+  const { mode, edit, error: actionError } = await searchParams;
   const supabase = await createClient();
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) return null;
@@ -162,7 +162,7 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
         <Link href={`/applications/${code}/access`}>Access</Link>
       </nav>
 
-      {error ? (
+      {actionError ? <div className="nx-data-error"><b>Perubahan tidak berhasil.</b><span>{actionError}</span></div> : error ? (
         <div className="nx-data-error"><b>Data tidak dapat dimuat.</b><span>{error.message}</span></div>
       ) : mode === "insert" ? (
         <section className="nx-editor">
