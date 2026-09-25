@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import PrintButton from "@/components/print-button";
+import ApplicationContextMenu from "@/components/application-context-menu";
 
 export const dynamic = "force-dynamic";
 
@@ -46,20 +47,23 @@ export default async function ApplicationWorkspacePage({ params }: Props) {
             <h1>{app.name}</h1>
             <p>{app.description}</p>
           </div>
-          <div className="nx-header-actions"><PrintButton /><Link className="nx-top-action" href="/tenant">Akun</Link></div>
+          <div className="nx-header-actions">
+            <PrintButton />
+            <ApplicationContextMenu code={app.code} />
+            <Link className="nx-top-action" href="/tenant">Akun</Link>
+          </div>
         </header>
 
-        <nav className="nx-section-nav nx-main-section-nav" aria-label="Navigasi aplikasi">
-          <Link href={`/applications/${app.code}`} className="active">Beranda kerja</Link>
-          <Link href={`/applications/${app.code}/data`}>Data</Link>
-          <Link href={`/applications/${app.code}/workflow`}>Workflow</Link>
-          <Link href={`/applications/${app.code}/documents`}>Documents</Link>
-          <Link href={`/applications/${app.code}/access`}>Access</Link>
-        </nav>
-
-        <section className="nx-workspace-grid">
+        <section className="nx-workspace-grid nx-workspace-grid-wide">
           <article className="nx-command-card nx-command-card-primary">
-            <div><span className="eyebrow">DATA KERJA</span><h2>Modul aplikasi</h2><p>Pilih modul untuk melihat, menambah, mengubah, menghapus, dan mencetak data sesuai hak akses yang diberikan database.</p></div>
+            <div className="nx-module-heading">
+              <div>
+                <span className="eyebrow">DATA KERJA</span>
+                <h2>Modul aplikasi</h2>
+                <p>Pilih modul untuk melihat, menambah, mengubah, menghapus, dan mencetak data.</p>
+              </div>
+              <Link className="nx-data-launch" href={`/applications/${app.code}/data`}>Semua data <span>→</span></Link>
+            </div>
             <div className="nx-entity-list">
               {activeEntities.map(entity => (
                 <Link href={`/applications/${app.code}/data/${entity.id}`} key={entity.id} className="nx-entity-item">
@@ -71,23 +75,6 @@ export default async function ApplicationWorkspacePage({ params }: Props) {
               {!activeEntities.length && <div className="nx-empty">Belum ada modul data aktif pada aplikasi ini. Modul akan dibuka setelah database operasional tersedia.</div>}
             </div>
           </article>
-
-          <aside className="nx-side-stack">
-            <article className="nx-command-card">
-              <span className="eyebrow">AKSI</span>
-              <h3>Kerjakan</h3>
-              <div className="nx-quick-actions">
-                <Link href={`/applications/${app.code}/data`}>Kelola data</Link>
-                <Link href={`/applications/${app.code}/workflow`}>Lihat workflow</Link>
-                <Link href={`/applications/${app.code}/documents`}>Cetak dokumen</Link>
-                <Link href={`/applications/${app.code}/access`}>Lihat hak akses</Link>
-              </div>
-            </article>
-            <article className="nx-command-card">
-              <span className="eyebrow">APLIKASI</span>
-              <p>{activeEntities.length} modul data tersedia untuk digunakan pada sesi ini.</p>
-            </article>
-          </aside>
         </section>
       </section>
     </main>
