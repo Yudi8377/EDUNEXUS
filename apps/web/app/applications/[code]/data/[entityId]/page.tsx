@@ -37,7 +37,7 @@ export default async function ApplicationEntityPage({ params }: Props) {
 
   const { data: rows, error } = await supabase.from(entity.table_name as any).select("*").limit(100);
   const records = (rows ?? []) as Record<string, unknown>[];
-  const columns = records.length ? Object.keys(records[0]).slice(0, 12) : [];
+  const columns = records.length && records[0] ? Object.keys(records[0]).slice(0, 12) : [];
 
   return (
     <main className="nx-data-page">
