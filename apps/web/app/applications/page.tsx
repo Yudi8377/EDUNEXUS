@@ -48,17 +48,16 @@ export default async function ApplicationsPage() {
 
         <div className="nx-toolbar">
           <strong>{apps?.length ?? 0} aplikasi</strong>
-          <span>Setiap aplikasi memiliki navigasi domain sendiri dan hanya menampilkan kemampuan yang sudah tersedia.</span>
+          <span>Pilih aplikasi yang ingin dikerjakan. Detail teknis internal tidak ditampilkan di sini.</span>
         </div>
 
         <section className="nx-application-table" aria-label="Daftar aplikasi EDUNEXUS">
-          <div className="nx-application-head"><span>Kode</span><span>Aplikasi</span><span>Fungsi</span><span>Status</span><span /></div>
+          <div className="nx-application-head"><span>Kode</span><span>Aplikasi</span><span>Fungsi</span><span /></div>
           {apps?.map((app) => (
             <Link href={`/applications/${app.code}`} key={app.id} className="nx-application-row">
               <span className="nx-code">{app.code}</span>
-              <span className="nx-app-title"><b>{app.name}</b><small>{app.route}</small></span>
+              <span className="nx-app-title"><b>{app.name}</b></span>
               <span className="nx-app-desc">{app.description}</span>
-              <span className={`app-status status-${app.lifecycle_status}`}>{app.lifecycle_status}</span>
               <span className="nx-launch">Buka →</span>
             </Link>
           ))}
