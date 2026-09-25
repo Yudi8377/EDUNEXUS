@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import PrintButton from "@/components/print-button";
+import DeleteRecordButton from "@/components/delete-record-button";
 
 export const dynamic = "force-dynamic";
 
@@ -202,7 +203,7 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
                         {row.id ? (
                           <form action={mutateRecord}>
                             <input type="hidden" name="_action" value="delete" /><input type="hidden" name="_code" value={code} /><input type="hidden" name="_entityId" value={entityId} /><input type="hidden" name="_recordId" value={String(row.id)} />
-                            <button className="nx-row-delete" type="submit" onClick={(e) => { if (!confirm("Hapus record ini? Tindakan ini tidak dapat dibatalkan.")) e.preventDefault(); }}>Hapus</button>
+                            <DeleteRecordButton />
                           </form>
                         ) : null}
                       </td>
