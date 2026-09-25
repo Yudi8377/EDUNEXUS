@@ -45,3 +45,11 @@ The 33-application layer provides application navigation, operational workspaces
 - Color semantics: green = active/healthy/primary, blue = informational, amber = planned/attention, violet = personal/secondary. Color is not the sole carrier of meaning.
 - Responsive behavior collapses the desktop rail and preserves the same navigation and task model on smaller screens.
 - Motion is restrained to hover/focus feedback and respects reduced-motion preferences.
+
+
+## Contextual application tools
+- The primary application workspace does not permanently display secondary Workflow, Documents, or Access navigation.
+- Those capabilities remain available through a compact "Lainnya" contextual control in the application header.
+- On pointer hover, keyboard focus, or activation, the control reveals Alur kerja, Dokumen, and Hak akses without taking permanent vertical space.
+- Data remains the primary visible workspace because it is the user's main operational surface.
+- The simplified shell deliberately gives the data/module area more horizontal and vertical room while preserving existing routes.
