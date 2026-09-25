@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{ code: string; entityId: string }>;
-  searchParams: Promise<{ mode?: string; edit?: string }>;
+  searchParams: Promise<{ mode?: string; edit?: string; error?: string }>;
 };
 
 const IMMUTABLE_FIELDS = new Set(["id", "created_at", "updated_at"]);
