@@ -24,68 +24,77 @@ export default async function ApplicationWorkspacePage({ params }: Props) {
   const activeEntities = (entities ?? []).filter(e => e.implementation_status === "existing");
 
   return (
-    <main className="nx-workspace">
-      <aside className="nx-sidebar">
-        <Link href="/applications" className="nx-brand"><span>EN</span><div><b>EDUNEXUS</b><small>Education OS</small></div></Link>
-        <div className="nx-sidebar-label">APLIKASI</div>
-        <nav className="nx-app-nav">
-          {apps?.map((item) => (
+    <main className="nx-os">
+      <aside className="nx-sidebar nx-sidebar-premium">
+        <Link href="/applications" className="nx-brand nx-brand-premium"><span>EN</span><div><b>EDUNEXUS</b><small>Intelligent Education OS</small></div></Link>
+        <div className="nx-sidebar-caption">RUANG KERJA</div>
+        <Link href="/applications" className="nx-home-link">⌂ <span>Beranda</span></Link>
+        <div className="nx-sidebar-caption">APLIKASI</div>
+        <nav className="nx-app-nav" aria-label="Aplikasi EDUNEXUS">
+          {(apps ?? []).map(item => (
             <Link href={`/applications/${item.code}`} key={item.id} className={item.code === app.code ? "nx-app-nav-item active" : "nx-app-nav-item"}>
-              <span className="nx-app-code">{item.code}</span>
+              <span className="nx-app-glyph">{String(item.sequence_no).padStart(2,"0")}</span>
               <span>{item.short_name || item.name}</span>
             </Link>
           ))}
         </nav>
-        <div className="nx-sidebar-foot"><span><span className="nx-online-dot" /> Sesi aktif</span><Link href="/applications">Semua aplikasi</Link></div>
+        <div className="nx-sidebar-foot nx-sidebar-foot-premium"><span><span className="nx-online-dot" /> Sistem aktif</span><Link href="/tenant">Akun & akses</Link></div>
       </aside>
 
       <section className="nx-main">
-        <header className="nx-topbar nx-app-header">
+        <header className="nx-topbar nx-topbar-premium nx-detail-topbar">
           <div>
-            <span className="eyebrow">EDUNEXUS</span>
+            <Link href="/applications" className="nx-breadcrumb">EDUNEXUS / Semua aplikasi</Link>
+            <span className="nx-kicker">RUANG KERJA / {String(app.sequence_no).padStart(2,"0")}</span>
             <h1>{app.name}</h1>
             <p>{app.description}</p>
           </div>
-          <div className="nx-header-actions"><PrintButton /><Link className="nx-top-action" href="/tenant">Akun</Link></div>
+          <div className="nx-header-actions"><span className="nx-live-badge"><span /> Live workspace</span><PrintButton /><Link className="nx-top-action" href="/tenant">Akun</Link></div>
         </header>
 
         <nav className="nx-section-nav nx-main-section-nav" aria-label="Navigasi aplikasi">
-          <Link href={`/applications/${app.code}`} className="active">Beranda kerja</Link>
+          <Link href={`/applications/${app.code}`} className="active">Beranda</Link>
           <Link href={`/applications/${app.code}/data`}>Data</Link>
-          <Link href={`/applications/${app.code}/workflow`}>Workflow</Link>
-          <Link href={`/applications/${app.code}/documents`}>Documents</Link>
-          <Link href={`/applications/${app.code}/access`}>Access</Link>
+          <Link href={`/applications/${app.code}/workflow`}>Proses kerja</Link>
+          <Link href={`/applications/${app.code}/documents`}>Dokumen</Link>
+          <Link href={`/applications/${app.code}/access`}>Hak akses</Link>
         </nav>
 
-        <section className="nx-workspace-grid">
-          <article className="nx-command-card nx-command-card-primary">
-            <div><span className="eyebrow">DATA KERJA</span><h2>Modul aplikasi</h2><p>Pilih modul untuk melihat, menambah, mengubah, menghapus, dan mencetak data sesuai hak akses yang diberikan database.</p></div>
-            <div className="nx-entity-list">
+        <section className="nx-context-line">
+          <span className="nx-context-dot" /><span>{app.short_name || app.name}</span><i>→</i><span>Ruang kerja aktif</span><i>→</i><span>{activeEntities.length} modul data</span>
+        </section>
+
+        <section className="nx-workspace-grid nx-workspace-grid-premium">
+          <article className="nx-command-card nx-command-card-primary nx-command-card-premium">
+            <span className="nx-kicker">KERJA HARI INI</span>
+            <h2>Modul yang bisa dikerjakan</h2>
+            <p>Pilih data yang ingin Anda kelola. Setiap perubahan tetap mengikuti sesi pengguna dan aturan database.</p>
+            <div className="nx-entity-list nx-entity-list-premium">
               {activeEntities.map(entity => (
                 <Link href={`/applications/${app.code}/data/${entity.id}`} key={entity.id} className="nx-entity-item">
-                  <span className="nx-entity-icon">DB</span>
+                  <span className="nx-entity-icon">{entity.is_primary ? "●" : "○"}</span>
                   <span><b>{entity.entity_name}</b><small>{entity.purpose}</small></span>
-                  <span className="nx-entity-action">Buka →</span>
+                  <span className="nx-entity-action">Kelola →</span>
                 </Link>
               ))}
-              {!activeEntities.length && <div className="nx-empty">Belum ada modul data aktif pada aplikasi ini. Modul akan dibuka setelah database operasional tersedia.</div>}
+              {!activeEntities.length && <div className="nx-empty"><strong>Belum ada modul data operasional.</strong><br />Ruang ini akan aktif ketika tabel domain tersedia. Tidak ada data palsu yang ditampilkan sebagai data produksi.</div>}
             </div>
           </article>
 
           <aside className="nx-side-stack">
-            <article className="nx-command-card">
-              <span className="eyebrow">AKSI</span>
-              <h3>Kerjakan</h3>
+            <article className="nx-command-card nx-command-card-premium">
+              <span className="nx-kicker">AKSI CEPAT</span>
+              <h3>Kerjakan sekarang</h3>
               <div className="nx-quick-actions">
-                <Link href={`/applications/${app.code}/data`}>Kelola data</Link>
-                <Link href={`/applications/${app.code}/workflow`}>Lihat workflow</Link>
-                <Link href={`/applications/${app.code}/documents`}>Cetak dokumen</Link>
-                <Link href={`/applications/${app.code}/access`}>Lihat hak akses</Link>
+                <Link className="nx-action-primary" href={`/applications/${app.code}/data`}>Kelola data <span>→</span></Link>
+                <Link href={`/applications/${app.code}/workflow`}>Lihat proses kerja <span>→</span></Link>
+                <Link href={`/applications/${app.code}/documents`}>Buka dokumen & cetak <span>→</span></Link>
               </div>
             </article>
-            <article className="nx-command-card">
-              <span className="eyebrow">APLIKASI</span>
-              <p>{activeEntities.length} modul data tersedia untuk digunakan pada sesi ini.</p>
+            <article className="nx-command-card nx-connection-card">
+              <span className="nx-kicker">KONTEKS DATA</span>
+              <h3>{activeEntities.length} modul</h3>
+              <p>Data di ruang ini dapat terhubung dengan siswa, kelas, guru, wali, pembelajaran, keselamatan, dan proses lain sesuai relasi yang tersedia.</p>
             </article>
           </aside>
         </section>
