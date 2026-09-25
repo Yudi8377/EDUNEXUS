@@ -62,7 +62,10 @@ async function mutateRecord(formData: FormData) {
   for (const column of columns) {
     if (IMMUTABLE_FIELDS.has(column) || column === "tenant_id") continue;
     const raw = formData.get(column);
-    if (raw === null) {\n      if (typeof sampleRecord[column] === "boolean") payload[column] = false;\n      continue;\n    }
+    if (raw === null) {
+      if (typeof sampleRecord[column] === "boolean") payload[column] = false;
+      continue;
+    }
     if (typeof raw === "string" && raw === "") {
       payload[column] = null;
       continue;
@@ -91,15 +94,18 @@ async function mutateRecord(formData: FormData) {
         .maybeSingle();
       if (membership?.tenant_id) payload.tenant_id = membership.tenant_id;
     }
-    const { error } = await supabase.from(table).insert(payload);\n    if (error) redirect(`/applications/${code}/data/${entityId}?error=${encodeURIComponent(error.message)}`);
+    const { error } = await supabase.from(table).insert(payload);
+    if (error) redirect(`/applications/${code}/data/${entityId}?error=${encodeURIComponent(error.message)}`);
   }
 
   if (action === "update" && recordId) {
-    const { error } = await supabase.from(table).update(payload).eq("id", recordId);\n    if (error) redirect(`/applications/${code}/data/${entityId}?error=${encodeURIComponent(error.message)}`);
+    const { error } = await supabase.from(table).update(payload).eq("id", recordId);
+    if (error) redirect(`/applications/${code}/data/${entityId}?error=${encodeURIComponent(error.message)}`);
   }
 
   if (action === "delete" && recordId) {
-    const { error } = await supabase.from(table).delete().eq("id", recordId);\n    if (error) redirect(`/applications/${code}/data/${entityId}?error=${encodeURIComponent(error.message)}`);
+    const { error } = await supabase.from(table).delete().eq("id", recordId);
+    if (error) redirect(`/applications/${code}/data/${entityId}?error=${encodeURIComponent(error.message)}`);
   }
 
   redirect(`/applications/${code}/data/${entityId}`);
