@@ -34,3 +34,14 @@ The 33-application layer provides application navigation, operational workspaces
 - Primary navigation uses plain public terms: Tentang, Program, Fasilitas, Berita, Agenda, Penerimaan. Authenticated access is labeled Portal EDUNEXUS.
 - The public site is a presentation layer over school data; future admin editing should reuse the existing EDUNEXUS operational CRUD primitives rather than creating a second content-management system.
 - Demo school content is explicitly tied to SNM-DEMO and must be replaced by tenant content before a real school domain is published.
+
+
+## Enterprise Interactive Control Desk
+- Authenticated EDUNEXUS uses an enterprise control-desk pattern: quiet light workspace, white navigation rail, deep education-green authority surface, restrained amber identity accent, and high-contrast data typography.
+- The dashboard is a working analysis surface, not a decorative landing page. Ringkasan, Aplikasi, and Analisis are explicit workspace modes.
+- Users can search applications with the "/" shortcut, clear searches, filter the application catalog, mark personal favorites, and switch between standard and dense information modes.
+- Metrics and analysis panels use only values returned from `application_registry`; no fabricated operational numbers are introduced.
+- Typography prioritizes scanability: compact labels for metadata, larger Manrope headings for hierarchy, and DM Sans for controls/body copy.
+- Color semantics: green = active/healthy/primary, blue = informational, amber = planned/attention, violet = personal/secondary. Color is not the sole carrier of meaning.
+- Responsive behavior collapses the desktop rail and preserves the same navigation and task model on smaller screens.
+- Motion is restrained to hover/focus feedback and respects reduced-motion preferences.
