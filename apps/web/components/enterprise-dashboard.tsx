@@ -32,7 +32,7 @@ const statusLabel = (status: string | null) => {
 };
 
 export default function EnterpriseDashboard({ apps }: { apps: AppRecord[] }) {
-  const [tab, setTab] = useState<"overview" | "apps" | "insights">("overview");
+  const [tab, setTab] = useState<"overview" | "apps" | "insights">("apps");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("Semua");
   const [dense, setDense] = useState(false);
@@ -115,7 +115,7 @@ export default function EnterpriseDashboard({ apps }: { apps: AppRecord[] }) {
         <header className="enterprise-topbar">
           <div className="enterprise-title">
             <button className="enterprise-mobile-menu" aria-label="Buka menu">☰</button>
-            <div><span>EDUNEXUS / CONTROL DESK</span><h1>{tab === "overview" ? "Ringkasan operasional" : tab === "apps" ? "Aplikasi sekolah" : "Analisis sistem"}</h1></div>
+            <div><span>EDUNEXUS / APLIKASI</span><h1>Katalog aplikasi</h1></div>
           </div>
           <div className="enterprise-actions">
             <label className="enterprise-search">
@@ -129,13 +129,13 @@ export default function EnterpriseDashboard({ apps }: { apps: AppRecord[] }) {
         </header>
 
         <div className="enterprise-content">
-          <div className="enterprise-tabs" role="tablist" aria-label="Tampilan workspace">
+          <div className="enterprise-tabs" role="tablist" aria-label="Tampilan workspace" style={{display:"none"}}>
             <button className={tab === "overview" ? "active" : ""} onClick={() => setTab("overview")}>Ringkasan</button>
             <button className={tab === "apps" ? "active" : ""} onClick={() => setTab("apps")}>Aplikasi</button>
             <button className={tab === "insights" ? "active" : ""} onClick={() => setTab("insights")}>Analisis</button>
           </div>
 
-          {tab === "overview" && (
+          {false && (
             <>
               <section className="enterprise-hero">
                 <div className="enterprise-hero-copy">
@@ -202,7 +202,7 @@ export default function EnterpriseDashboard({ apps }: { apps: AppRecord[] }) {
             </>
           )}
 
-          {tab === "insights" && (
+          {false && (
             <>
               <section className="enterprise-page-intro"><div><span>OPERATIONAL ANALYSIS</span><h2>Analisis workspace</h2><p>Gunakan panel ini untuk membaca struktur portofolio aplikasi yang benar-benar terdaftar di EDUNEXUS.</p></div></section>
               <section className="insight-grid">
