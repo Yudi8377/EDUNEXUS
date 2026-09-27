@@ -169,6 +169,19 @@ jobs:
           test -s /tmp/edunexus-home.html
           echo "EDUNEXUS HTTP smoke test: PASS"
 
+      - name: Cloudflare runtime tail on smoke failure
+        if: failure()
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set +e
+          timeout 20s pnpm exec wrangler tail edunexus-web --format pretty --status error
+          code=$?
+          echo "wrangler tail exited with code $code"
+          exit 1
+
       - name: Print deployment metadata
         working-directory: apps/web
         env:
