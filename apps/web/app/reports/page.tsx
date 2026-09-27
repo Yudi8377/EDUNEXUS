@@ -1,23 +1,21 @@
 import Link from "next/link";
 import PrintButton from "@/components/print-button";
 
+const reports = [
+  ["/students","Profil Siswa 360","Daftar siswa, status, kelas, kehadiran, dan bukti pembelajaran."],
+  ["/teacher","Operasional Guru","Kelas aktif, siswa, kehadiran, dan bukti pembelajaran guru."],
+  ["/attendance","Kehadiran","Pencatatan kehadiran melalui Edge Function dengan audit."],
+  ["/learning","Bukti Pembelajaran","Pencatatan evidence yang menjadi sumber Student 360 dan AI."],
+  ["/safety","Keselamatan Siswa","Verifikasi penjemputan, hasil verifikasi, dan human approval gate."],
+  ["/tenant","Organisasi & Akses","Konteks tenant, membership, role, dan risiko akses."]
+];
+
 export default function ReportsPage() {
-  return (
-    <main className="simple-page">
-      <div className="page-tools">
-        <Link href="/">← Pusat Kendali</Link>
-        <PrintButton label="Cetak pusat laporan" />
-      </div>
-      <p className="eyebrow">LAPORAN • TERKENDALI</p>
-      <h1>Pusat laporan EDUNEXUS.</h1>
-      <p className="lede">Akses cepat ke keluaran operasional yang dapat dicetak. Data berasal dari sistem nyata; EDUNEXUS tidak membuat angka atau data fiktif.</p>
-      <section className="report-grid">
-        <Link className="report-card" href="/students"><strong>Profil Siswa 360</strong><span>Daftar siswa, status, kehadiran, dan bukti pembelajaran.</span></Link>
-        <Link className="report-card" href="/teacher"><strong>Laporan Guru</strong><span>Kelas aktif, siswa, kehadiran, dan bukti pembelajaran.</span></Link>
-        <Link className="report-card" href="/attendance"><strong>Kehadiran</strong><span>Form pencatatan dan keluaran yang dapat dicetak.</span></Link>
-        <Link className="report-card" href="/learning"><strong>Bukti Pembelajaran</strong><span>Form bukti pembelajaran dan keluaran yang dapat dicetak.</span></Link>
-        <Link className="report-card" href="/tenant"><strong>Organisasi & Akses</strong><span>Keanggotaan dan peran efektif akun.</span></Link>
-      </section>
-    </main>
-  );
+  return <main className="simple-page">
+    <div className="page-tools"><Link href="/">← Pusat Kendali</Link><PrintButton label="Cetak pusat laporan" /></div>
+    <p className="eyebrow">LAPORAN · OPERASIONAL</p>
+    <h1>Pusat laporan EDUNEXUS.</h1>
+    <p className="lede">Indeks keluaran operasional. Setiap laporan membuka modul sumber sehingga data dapat diperiksa, diproses, dan dicetak tanpa membuat angka sintetis.</p>
+    <section className="report-grid">{reports.map(([href,title,desc]) => <Link className="report-card" href={href} key={href}><strong>{title}</strong><span>{desc}</span><b>Buka modul →</b></Link>)}</section>
+  </main>;
 }
