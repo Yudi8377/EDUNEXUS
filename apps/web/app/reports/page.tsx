@@ -8,7 +8,7 @@ const reports = [
   ["/learning","Bukti Pembelajaran","Pencatatan evidence yang menjadi sumber Student 360 dan AI."],
   ["/safety","Keselamatan Siswa","Verifikasi penjemputan, hasil verifikasi, dan human approval gate."],
   ["/tenant","Organisasi & Akses","Konteks tenant, membership, role, dan risiko akses."]
-];
+] as const;
 
 export default function ReportsPage() {
   return <main className="simple-page">
