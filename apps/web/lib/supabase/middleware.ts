@@ -14,6 +14,15 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
+  const publicPath =
+    request.nextUrl.pathname === "/" ||
+    request.nextUrl.pathname.startsWith("/auth/");
+
+  if (publicPath) {
+    response.headers.set("Cache-Control", "private, no-store");
+    return response;
+  }
+
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
