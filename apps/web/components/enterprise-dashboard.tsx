@@ -94,7 +94,7 @@ export default function EnterpriseDashboard({ apps }: { apps: AppRecord[] }) {
           <button className={tab === "overview" ? "active" : ""} onClick={() => setTab("overview")}><i>⌂</i> Ringkasan</button>
           <button className={tab === "apps" ? "active" : ""} onClick={() => setTab("apps")}><i>▦</i> Aplikasi <em>{apps.length}</em></button>
           <Link href="/students"><i>◎</i> Student 360</Link>
-          <Link href="/teachers"><i>♙</i> Teacher</Link>
+          <Link href="/teacher"><i>♙</i> Teacher</Link>
           <Link href="/reports"><i>▥</i> Laporan</Link>
         </nav>
         <div className="enterprise-nav-label">MANAGEMENT</div>
