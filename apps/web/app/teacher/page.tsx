@@ -12,7 +12,7 @@ type TeacherRow = {
   active_class_count: number;
   visible_active_class_count: number;
   assigned_student_count: number;
-  attendance_today_records: number;
+  kehadiran_today_records: number;
   learning_evidence_30d: number;
   last_learning_evidence_at: string | null;
 };
@@ -81,7 +81,7 @@ export default async function TeacherCommandCenterPage() {
         <div className="empty-card">
           <strong>Belum ada akun guru yang disediakan.</strong>
           <span>
-            The live database currently contains no teacher records. Provision a teacher through the governed onboarding
+            Database aktif saat ini belum memiliki data guru. Tambahkan guru melalui proses onboarding yang dikendalikan
             operation; EDUNEXUS does not create synthetic personnel data.
           </span>
         </div>
@@ -100,7 +100,7 @@ export default async function TeacherCommandCenterPage() {
           <h1>Pengajaran yang baik dimulai dari konteks yang jelas.</h1>
           <p className="lede">
             {teacher.teacher_name} · {teacher.employee_no}. One governed view across assigned classes, attendance and
-            learning evidence.
+            bukti pembelajaran.
           </p>
         </div>
         <span className="tenant">Guru {teacher.teacher_status}</span>
@@ -129,7 +129,7 @@ export default async function TeacherCommandCenterPage() {
               <h4>{row.class_name}</h4>
               <p>{row.subject_code ? `Mata pelajaran · ${row.subject_code}` : "Kelas tugas"}</p>
               <div className="teacher-class-stats">
-                <span><b>{row.student_count}</b> students</span>
+                <span><b>{row.student_count}</b> siswa</span>
                 <span><b>{row.attendance_today}</b> attendance</span>
                 <span><b>{row.learning_evidence_30d}</b> bukti / 30 hari</span>
               </div>
