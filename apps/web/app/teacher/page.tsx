@@ -12,7 +12,7 @@ type TeacherRow = {
   active_class_count: number;
   visible_active_class_count: number;
   assigned_student_count: number;
-  kehadiran_today_records: number;
+  attendance_today_records: number;
   learning_evidence_30d: number;
   last_learning_evidence_at: string | null;
 };
