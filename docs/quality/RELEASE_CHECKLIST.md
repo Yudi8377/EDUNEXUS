@@ -37,3 +37,7 @@
 - [ ] recovery test completed
 - [ ] rollback plan tested
 - [ ] deployment gate recorded
+
+
+## Runtime redeploy verification
+- Cloudflare Workers Free deployment must pass build, Worker verification, workers.dev verification, and HTTP smoke test before production is considered healthy.
