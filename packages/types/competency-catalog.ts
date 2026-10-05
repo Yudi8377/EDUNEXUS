@@ -1,4 +1,5 @@
-import type { CompetencyDomain, MasteryLevel } from "./talent-skill";
+export type CompetencyDomain = "Character" | "Talent & Interest" | "Soft Skills" | "Hard Skills" | "Life Skills";
+export type MasteryLevel = "Explore" | "Foundation" | "Developing" | "Proficient" | "Advanced" | "Applied/Portfolio";
 
 export type SafetyClass = "standard" | "minor_safe" | "high_impact_review";
 
