@@ -1,5 +1,4 @@
-import type { CompetencyDefinition } from "@edunexus/types/competency-catalog";
-import type { MasteryLevel } from "@edunexus/types/talent-skill";
+import type { CompetencyDefinition, MasteryLevel } from "../../../../packages/types/competency-catalog";
 
 export interface RubricObservation {
   dimension: string;
