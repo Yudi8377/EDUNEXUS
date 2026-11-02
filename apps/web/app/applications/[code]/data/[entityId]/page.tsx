@@ -59,9 +59,11 @@ async function mutateRecord(formData: FormData) {
   if (!columns.length) return;
 
   const payload: Record<string, unknown> = {};
+  const dataPayload: Record<string, unknown> = {};
   for (const column of columns) {
     if (IMMUTABLE_FIELDS.has(column) || column === "tenant_id") continue;
     const raw = formData.get(column);
+    if (column === "data") continue;
     if (raw === null) {
       if (typeof sampleRecord[column] === "boolean") payload[column] = false;
       continue;
@@ -83,6 +85,13 @@ async function mutateRecord(formData: FormData) {
       payload[column] = String(raw);
     }
   }
+
+  for (const [key, value] of Array.from(formData.entries())) {
+    if (!key.startsWith("data__")) continue;
+    const field = key.slice(6);
+    dataPayload[field] = String(value);
+  }
+  if (Object.keys(dataPayload).length) payload.data = dataPayload;
 
   if (action === "insert") {
     if (columns.includes("tenant_id")) {
@@ -143,8 +152,23 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
   const { data: rows, error } = await supabase.from(entity.table_name as any).select("*").limit(100);
   const records = (rows ?? []) as Record<string, unknown>[];
   const columns = records.length && records[0] ? Object.keys(records[0]).slice(0, 12) : [];
+  const [{ data: students }, { data: employees }, { data: guardians }, { data: teachers }] = await Promise.all([
+    supabase.from("students").select("id,student_no,full_name").order("full_name").limit(200),
+    supabase.from("employees").select("id,employee_no,full_name").order("full_name").limit(200),
+    supabase.from("guardians").select("id,full_name").order("full_name").limit(200),
+    supabase.from("teachers").select("id,employee_no,full_name").order("full_name").limit(200)
+  ]);
+  const relationOptions: Record<string, Array<{ value: string; label: string }>> = {
+    student_id: (students ?? []).map((x) => ({ value: x.id, label: x.full_name + " (" + x.student_no + ")" })),
+    employee_id: (employees ?? []).map((x) => ({ value: x.id, label: x.full_name + " (" + x.employee_no + ")" })),
+    guardian_id: (guardians ?? []).map((x) => ({ value: x.id, label: x.full_name })),
+    teacher_id: (teachers ?? []).map((x) => ({ value: x.id, label: x.full_name + " (" + x.employee_no + ")" }))
+  };
   const editRecord = edit ? records.find((row) => String(row.id) === edit) : undefined;
-  const formColumns = columns.filter((column) => !IMMUTABLE_FIELDS.has(column) && column !== "tenant_id");
+  const sampleData = (records[0]?.data && typeof records[0].data === "object" && !Array.isArray(records[0].data) ? records[0].data : {}) as Record<string, unknown>;
+  const editData = (editRecord?.data && typeof editRecord.data === "object" && !Array.isArray(editRecord.data) ? editRecord.data : sampleData) as Record<string, unknown>;
+  const dataFields = Array.from(new Set([...Object.keys(sampleData), ...Object.keys(editData)]));
+  const formColumns = columns.filter((column) => !IMMUTABLE_FIELDS.has(column) && column !== "tenant_id" && column !== "data");
 
   return (
     <main className="nx-data-page">
@@ -176,7 +200,8 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
           {formColumns.length ? (
             <form action={mutateRecord} className="nx-record-form">
               <input type="hidden" name="_action" value="insert" /><input type="hidden" name="_code" value={code} /><input type="hidden" name="_entityId" value={entityId} />
-              {formColumns.map((column) => <Field key={column} name={column} value={undefined} reference={records[0]?.[column]} />)}
+              {formColumns.map((column) => <Field key={column} name={column} value={undefined} reference={records[0]?.[column]} options={optionsFor(column, relationOptions)} />)}
+              {dataFields.length ? <fieldset className="nx-form-section"><legend>Detail data</legend>{dataFields.map((field) => <Field key={field} name={"data__"+field} value={undefined} reference={sampleData[field]} />)}</fieldset> : null}
               <button className="nx-save-button" type="submit">Simpan data</button>
             </form>
           ) : <div className="nx-data-empty"><h2>Form belum dapat dibuat</h2><p>Tabel belum memiliki contoh record untuk membaca bentuk kolom. Schema form perlu dibuat khusus untuk modul ini.</p></div>}
@@ -186,7 +211,8 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
           <div className="nx-editor-head"><div><span className="eyebrow">UPDATE</span><h2>Ubah {entity.entity_name}</h2><p>Perubahan diterapkan pada record yang dipilih dan tetap tunduk pada RLS.</p></div><Link href={`/applications/${code}/data/${entityId}`}>Batal</Link></div>
           <form action={mutateRecord} className="nx-record-form">
             <input type="hidden" name="_action" value="update" /><input type="hidden" name="_code" value={code} /><input type="hidden" name="_entityId" value={entityId} /><input type="hidden" name="_recordId" value={String(editRecord.id)} />
-            {formColumns.map((column) => <Field key={column} name={column} value={editRecord[column]} reference={editRecord[column]} />)}
+            {formColumns.map((column) => <Field key={column} name={column} value={editRecord[column]} reference={editRecord[column]} options={optionsFor(column)} />)}
+            {dataFields.length ? <fieldset className="nx-form-section"><legend>Detail data</legend>{dataFields.map((field) => <Field key={field} name={"data__"+field} value={editData[field]} reference={editData[field]} />)}</fieldset> : null}
             <button className="nx-save-button" type="submit">Simpan perubahan</button>
           </form>
         </section>
@@ -227,7 +253,11 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
   );
 }
 
-function Field({ name, value, reference }: { name: string; value: unknown; reference: unknown }) {
+function optionsFor(column: string, relationOptions: Record<string, Array<{ value: string; label: string }>>) {
+  return relationOptions[column];
+}
+
+function Field({ name, value, reference, options }: { name: string; value: unknown; reference: unknown; options?: Array<{ value: string; label: string }> }) {
   const type = inputType(reference);
   if (type === "checkbox") {
     return <label className="nx-field nx-checkbox"><span>{labelFor(name)}</span><input name={name} type="checkbox" value="true" defaultChecked={Boolean(value)} /></label>;
@@ -236,7 +266,7 @@ function Field({ name, value, reference }: { name: string; value: unknown; refer
   return (
     <label className="nx-field">
       <span>{labelFor(name)}</span>
-      {objectValue ? <textarea name={name} defaultValue={value === undefined ? "" : JSON.stringify(value, null, 2)} /> : <input name={name} type={type} defaultValue={value === undefined || value === null ? "" : String(value)} />}
+      {options?.length ? <select name={name} defaultValue={value === undefined || value === null ? "" : String(value)}><option value="">Pilih {labelFor(name)}</option>{options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> : objectValue ? <textarea name={name} defaultValue={value === undefined ? "" : JSON.stringify(value, null, 2)} /> : <input name={name} type={type} defaultValue={value === undefined || value === null ? "" : String(value)} />}
     </label>
   );
 }
