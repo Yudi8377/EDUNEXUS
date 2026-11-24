@@ -143,6 +143,20 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
   const { data: rows, error } = await supabase.from(entity.table_name as any).select("*").limit(100);
   const records = (rows ?? []) as Record<string, unknown>[];
   const columns = records.length && records[0] ? Object.keys(records[0]).slice(0, 12) : [];
+
+  const hrOptions: Record<string, Array<{ value: string; label: string }>> = {};
+  if (code === "15" && entity.entity_name === "employees") {
+    const [{ data: positions }, { data: teachers }] = await Promise.all([
+      supabase.from("positions").select("id,name,code").order("name"),
+      supabase.from("teachers").select("id,full_name,employee_no").order("full_name")
+    ]);
+    hrOptions.position_id = (positions ?? []).map((item) => ({ value: item.id, label: item.name + " (" + item.code + ")" }));
+    hrOptions.teacher_id = (teachers ?? []).map((item) => ({ value: item.id, label: item.full_name + " (" + item.employee_no + ")" }));
+  }
+  if (code === "15" && (entity.entity_name === "employment_contracts" || entity.entity_name === "hr_events")) {
+    const { data: employees } = await supabase.from("employees").select("id,full_name,employee_no").order("full_name");
+    hrOptions.employee_id = (employees ?? []).map((item) => ({ value: item.id, label: item.full_name + " (" + item.employee_no + ")" }));
+  }
   const editRecord = edit ? records.find((row) => String(row.id) === edit) : undefined;
   const formColumns = columns.filter((column) => !IMMUTABLE_FIELDS.has(column) && column !== "tenant_id");
 
@@ -172,11 +186,11 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
         <div className="nx-data-error"><b>Data tidak dapat dimuat.</b><span>{error.message}</span></div>
       ) : mode === "insert" ? (
         <section className="nx-editor">
-          <div className="nx-editor-head"><div><span className="eyebrow">INSERT</span><h2>Tambah {entity.entity_name}</h2><p>Isi data baru. Hak akses dan RLS database tetap menjadi pengaman transaksi.</p></div><Link href={`/applications/${code}/data/${entityId}`}>Batal</Link></div>
+          <div className="nx-editor-head"><div><span className="eyebrow">FORM DATA</span><h2>Tambah {entity.entity_name}</h2><p>Isi data HR dengan kolom yang jelas. Pilihan pegawai, jabatan, dan guru menggunakan data terkait yang sudah tersedia.</p></div><Link href={`/applications/${code}/data/${entityId}`}>Batal</Link></div>
           {formColumns.length ? (
             <form action={mutateRecord} className="nx-record-form">
               <input type="hidden" name="_action" value="insert" /><input type="hidden" name="_code" value={code} /><input type="hidden" name="_entityId" value={entityId} />
-              {formColumns.map((column) => <Field key={column} name={column} value={undefined} reference={records[0]?.[column]} />)}
+              {formColumns.map((column) => <Field key={column} name={column} value={undefined} reference={records[0]?.[column]} options={hrOptions[column]} />)}
               <button className="nx-save-button" type="submit">Simpan data</button>
             </form>
           ) : <div className="nx-data-empty"><h2>Form belum dapat dibuat</h2><p>Tabel belum memiliki contoh record untuk membaca bentuk kolom. Schema form perlu dibuat khusus untuk modul ini.</p></div>}
@@ -186,7 +200,7 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
           <div className="nx-editor-head"><div><span className="eyebrow">UPDATE</span><h2>Ubah {entity.entity_name}</h2><p>Perubahan diterapkan pada record yang dipilih dan tetap tunduk pada RLS.</p></div><Link href={`/applications/${code}/data/${entityId}`}>Batal</Link></div>
           <form action={mutateRecord} className="nx-record-form">
             <input type="hidden" name="_action" value="update" /><input type="hidden" name="_code" value={code} /><input type="hidden" name="_entityId" value={entityId} /><input type="hidden" name="_recordId" value={String(editRecord.id)} />
-            {formColumns.map((column) => <Field key={column} name={column} value={editRecord[column]} reference={editRecord[column]} />)}
+            {formColumns.map((column) => <Field key={column} name={column} value={editRecord[column]} reference={editRecord[column]} options={hrOptions[column]} />)}
             <button className="nx-save-button" type="submit">Simpan perubahan</button>
           </form>
         </section>
@@ -227,7 +241,7 @@ export default async function ApplicationEntityPage({ params, searchParams }: Pr
   );
 }
 
-function Field({ name, value, reference }: { name: string; value: unknown; reference: unknown }) {
+function Field({ name, value, reference, options }: { name: string; value: unknown; reference: unknown; options?: Array<{ value: string; label: string }> }) {
   const type = inputType(reference);
   if (type === "checkbox") {
     return <label className="nx-field nx-checkbox"><span>{labelFor(name)}</span><input name={name} type="checkbox" value="true" defaultChecked={Boolean(value)} /></label>;
@@ -236,7 +250,16 @@ function Field({ name, value, reference }: { name: string; value: unknown; refer
   return (
     <label className="nx-field">
       <span>{labelFor(name)}</span>
-      {objectValue ? <textarea name={name} defaultValue={value === undefined ? "" : JSON.stringify(value, null, 2)} /> : <input name={name} type={type} defaultValue={value === undefined || value === null ? "" : String(value)} />}
+      {options?.length ? (
+        <select name={name} defaultValue={value === undefined || value === null ? "" : String(value)}>
+          <option value="">Pilih {labelFor(name)}</option>
+          {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        </select>
+      ) : objectValue ? (
+        <textarea name={name} defaultValue={value === undefined ? "" : JSON.stringify(value, null, 2)} />
+      ) : (
+        <input name={name} type={type} defaultValue={value === undefined || value === null ? "" : String(value)} />
+      )}
     </label>
   );
 }
